@@ -100,6 +100,8 @@ export interface BusinessMetrics {
   receivedIn?: number;
   cashBalance: number;
   personalExpenses?: number;
+  totalInvestments?: number;
+  settledInvestments?: number;
 }
 
 export interface DashboardData {

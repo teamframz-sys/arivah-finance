@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { UserWithStats, ActivityLog } from '@/lib/types';
 import { getUsersWithStats, getActivityLogs } from '@/lib/api/users';
-import { Users as UsersIcon, Activity, FileText, CheckSquare, TrendingUp } from 'lucide-react';
+import { Users as UsersIcon, Activity, FileText, CheckSquare, TrendingUp, Download, Filter, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -11,17 +11,29 @@ export default function UsersPage() {
   const [users, setUsers] = useState<UserWithStats[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserWithStats | null>(null);
   const [allActivity, setAllActivity] = useState<ActivityLog[]>([]);
+  const [filteredActivity, setFilteredActivity] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    actionType: 'all',
+    entityType: 'all',
+    dateFrom: '',
+    dateTo: '',
+  });
 
   useEffect(() => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    applyFilters();
+  }, [allActivity, selectedUser, filters]);
+
   const loadData = async () => {
     try {
       const [usersData, activityData] = await Promise.all([
         getUsersWithStats(),
-        getActivityLogs(undefined, 50),
+        getActivityLogs(undefined, 200), // Increased limit for better filtering
       ]);
       setUsers(usersData);
       setAllActivity(activityData);
@@ -31,6 +43,76 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyFilters = () => {
+    let activities = selectedUser ? selectedUser.recent_activity || [] : allActivity;
+
+    // Filter by action type
+    if (filters.actionType !== 'all') {
+      activities = activities.filter(log => log.action.includes(filters.actionType));
+    }
+
+    // Filter by entity type
+    if (filters.entityType !== 'all') {
+      activities = activities.filter(log => log.entity_type === filters.entityType);
+    }
+
+    // Filter by date range
+    if (filters.dateFrom) {
+      activities = activities.filter(
+        log => new Date(log.created_at) >= new Date(filters.dateFrom)
+      );
+    }
+    if (filters.dateTo) {
+      activities = activities.filter(
+        log => new Date(log.created_at) <= new Date(filters.dateTo + 'T23:59:59')
+      );
+    }
+
+    setFilteredActivity(activities);
+  };
+
+  const exportToCSV = () => {
+    const activities = filteredActivity;
+
+    if (activities.length === 0) {
+      toast.error('No activity to export');
+      return;
+    }
+
+    // CSV headers
+    const headers = ['Date', 'Time', 'User', 'Action', 'Entity Type', 'Entity ID', 'Details'];
+
+    // CSV rows
+    const rows = activities.map(log => [
+      format(new Date(log.created_at), 'yyyy-MM-dd'),
+      format(new Date(log.created_at), 'HH:mm:ss'),
+      log.user?.name || 'Unknown',
+      formatActionText(log.action),
+      log.entity_type,
+      log.entity_id || '',
+      JSON.stringify(log.details || {})
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `activity_log_${format(new Date(), 'yyyy-MM-dd_HHmmss')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success('Activity log exported successfully');
   };
 
   const getActionIcon = (action: string) => {
@@ -115,10 +197,28 @@ export default function UsersPage() {
 
       {/* Activity Timeline */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Activity className="w-5 h-5" />
-          {selectedUser ? `${selectedUser.name}'s Activity` : 'All Activity'}
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            {selectedUser ? `${selectedUser.name}'s Activity` : 'All Activity'}
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium"
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+            </button>
+            <button
+              onClick={exportToCSV}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+          </div>
+        </div>
 
         {selectedUser && (
           <button
@@ -129,8 +229,86 @@ export default function UsersPage() {
           </button>
         )}
 
+        {/* Filters Panel */}
+        {showFilters && (
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Action Type
+                </label>
+                <select
+                  value={filters.actionType}
+                  onChange={(e) => setFilters({ ...filters, actionType: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="all">All Actions</option>
+                  <option value="created">Created</option>
+                  <option value="updated">Updated</option>
+                  <option value="deleted">Deleted</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Entity Type
+                </label>
+                <select
+                  value={filters.entityType}
+                  onChange={(e) => setFilters({ ...filters, entityType: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="all">All Types</option>
+                  <option value="transaction">Transactions</option>
+                  <option value="task">Tasks</option>
+                  <option value="transfer">Transfers</option>
+                  <option value="profit_sharing">Profit Sharing</option>
+                  <option value="user">Users</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date From
+                </label>
+                <input
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date To
+                </label>
+                <input
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => setFilters({ actionType: 'all', entityType: 'all', dateFrom: '', dateTo: '' })}
+                className="text-sm text-gray-600 hover:text-gray-800"
+              >
+                Clear Filters
+              </button>
+              <span className="text-sm text-gray-500">
+                Showing {filteredActivity.length} of {selectedUser ? selectedUser.recent_activity?.length || 0 : allActivity.length} activities
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4">
-          {(selectedUser ? selectedUser.recent_activity : allActivity)?.map((log) => (
+          {filteredActivity?.map((log) => (
             <div
               key={log.id}
               className="flex gap-4 p-4 rounded-lg hover:bg-gray-50 border border-gray-100"
@@ -171,10 +349,14 @@ export default function UsersPage() {
             </div>
           )) || []}
 
-          {((selectedUser && !selectedUser.recent_activity?.length) || (!selectedUser && !allActivity.length)) && (
+          {filteredActivity.length === 0 && (
             <div className="text-center py-12">
               <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No activity yet</p>
+              <p className="text-gray-600">
+                {showFilters && (filters.actionType !== 'all' || filters.entityType !== 'all' || filters.dateFrom || filters.dateTo)
+                  ? 'No activity matches the selected filters'
+                  : 'No activity yet'}
+              </p>
             </div>
           )}
         </div>

@@ -3,6 +3,7 @@ import { getTransactions } from './transactions';
 import { getTransfersBetweenBusinesses } from './transfers';
 import { getBusinessByName } from './businesses';
 import { getPersonalExpenses } from './personal-expenses';
+import { getInvestments, getInvestmentSettlements } from './investments';
 import { getTransactionSign } from '@/lib/utils';
 
 export async function getBusinessMetrics(
@@ -23,10 +24,18 @@ export async function getBusinessMetrics(
     endDate,
   });
 
+  // Get investments for this business
+  const investments = await getInvestments({
+    businessId,
+    startDate,
+    endDate,
+  });
+
   let totalRevenue = 0;
   let totalExpenses = 0;
   let transferredOut = 0;
   let receivedIn = 0;
+  let totalInvestments = 0;
 
   transactions.forEach(txn => {
     const amount = txn.amount;
@@ -56,20 +65,33 @@ export async function getBusinessMetrics(
   const personalExpensesTotal = personalExpenses.reduce((sum, exp) => sum + exp.amount, 0);
   totalExpenses += personalExpensesTotal;
 
+  // Calculate total investments (add to revenue for the period)
+  totalInvestments = investments.reduce((sum, inv) => sum + inv.amount, 0);
+  totalRevenue += totalInvestments;
+
   const netProfit = totalRevenue - totalExpenses;
 
   // Calculate cash balance (all time)
   const allTransactions = await getTransactions({ businessId });
   const allPersonalExpenses = await getPersonalExpenses({ businessId });
+  const allInvestments = await getInvestments({ businessId });
 
   let cashBalance = allTransactions.reduce((sum, txn) => {
     const sign = getTransactionSign(txn.type);
     return sum + (txn.amount * sign);
   }, 0);
 
+  // Add all-time investments to cash balance
+  const allTimeInvestments = allInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+  cashBalance += allTimeInvestments;
+
   // Subtract all-time personal expenses from cash balance
   const allTimePersonalExpenses = allPersonalExpenses.reduce((sum, exp) => sum + exp.amount, 0);
   cashBalance -= allTimePersonalExpenses;
+
+  // Calculate settled investments
+  const settledInvestments = investments.filter(inv => inv.is_settled);
+  const settledInvestmentsTotal = settledInvestments.reduce((sum, inv) => sum + inv.amount, 0);
 
   return {
     totalRevenue,
@@ -79,6 +101,8 @@ export async function getBusinessMetrics(
     receivedIn,
     cashBalance,
     personalExpenses: personalExpensesTotal,
+    totalInvestments,
+    settledInvestments: settledInvestmentsTotal,
   };
 }
 

@@ -18,19 +18,51 @@ import {
   CheckSquare,
   Activity,
   Wallet,
-  TrendingUp
+  TrendingUp,
+  ChevronDown,
+  ChevronRight,
+  DollarSign,
+  BarChart3,
+  FileText,
+  Download
 } from 'lucide-react';
 
-const navItems = [
+interface NavItem {
+  href?: string;
+  label: string;
+  icon: any;
+  children?: NavItem[];
+}
+
+const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/business/web-dev', label: 'Arivah Web Dev', icon: Code },
-  { href: '/business/jewels', label: 'Arivah Jewels', icon: Gem },
-  { href: '/transfers', label: 'Transfers', icon: ArrowLeftRight },
-  { href: '/partner-share', label: 'Partner Share', icon: Users },
-  { href: '/investments', label: 'Investments', icon: TrendingUp },
-  { href: '/personal-expenses', label: 'Personal Expenses', icon: Wallet },
-  { href: '/tasks', label: 'Tasks', icon: CheckSquare },
-  { href: '/users', label: 'Users & Activity', icon: Activity },
+  {
+    label: 'Businesses',
+    icon: BarChart3,
+    children: [
+      { href: '/business/web-dev', label: 'Arivah Web Dev', icon: Code },
+      { href: '/business/jewels', label: 'Arivah Jewels', icon: Gem },
+    ],
+  },
+  {
+    label: 'Finance',
+    icon: DollarSign,
+    children: [
+      { href: '/transfers', label: 'Transfers', icon: ArrowLeftRight },
+      { href: '/investments', label: 'Investments', icon: TrendingUp },
+      { href: '/partner-share', label: 'Partner Share', icon: Users },
+      { href: '/personal-expenses', label: 'Personal Expenses', icon: Wallet },
+    ],
+  },
+  {
+    label: 'Management',
+    icon: FileText,
+    children: [
+      { href: '/tasks', label: 'Tasks', icon: CheckSquare },
+      { href: '/users', label: 'Users & Activity', icon: Activity },
+      { href: '/reports', label: 'Reports & Export', icon: Download },
+    ],
+  },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -38,6 +70,11 @@ export default function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({
+    Businesses: true,
+    Finance: true,
+    Management: true,
+  });
 
   const handleLogout = async () => {
     try {
@@ -52,6 +89,64 @@ export default function Navigation() {
 
   const isActive = (href: string) => pathname === href || pathname?.startsWith(href + '/');
 
+  const toggleMenu = (label: string) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
+  const renderNavItem = (item: NavItem, depth: number = 0) => {
+    const Icon = item.icon;
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedMenus[item.label];
+
+    if (hasChildren) {
+      return (
+        <div key={item.label}>
+          <button
+            onClick={() => toggleMenu(item.label)}
+            className={`flex items-center justify-between w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-50 ${
+              depth > 0 ? 'pl-8' : ''
+            }`}
+          >
+            <div className="flex items-center">
+              <Icon className="mr-3 h-5 w-5" />
+              {item.label}
+            </div>
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
+          {isExpanded && (
+            <div className="ml-4 space-y-1 mt-1">
+              {item.children.map(child => renderNavItem(child, depth + 1))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href!}
+        className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+          depth > 0 ? 'pl-8' : ''
+        } ${
+          isActive(item.href!)
+            ? 'bg-primary-50 text-primary-700'
+            : 'text-gray-700 hover:bg-gray-50'
+        }`}
+      >
+        <Icon className="mr-3 h-5 w-5" />
+        {item.label}
+      </Link>
+    );
+  };
+
   return (
     <>
       {/* Desktop Sidebar */}
@@ -61,23 +156,7 @@ export default function Navigation() {
             <h1 className="text-xl font-bold text-primary-900">Arivah Finance</h1>
           </div>
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="mr-3 h-5 w-5" />
-                  {item.label}
-                </Link>
-              );
-            })}
+            {navItems.map(item => renderNavItem(item))}
           </nav>
           <div className="flex-shrink-0 border-t border-gray-200 p-4">
             <button
@@ -107,31 +186,18 @@ export default function Navigation() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-white pt-16">
-          <nav className="px-4 py-6 space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="mr-3 h-5 w-5" />
-                  {item.label}
-                </Link>
-              );
-            })}
+          <nav className="px-4 py-6 space-y-1 overflow-y-auto pb-20">
+            {navItems.map(item => (
+              <div key={item.label} onClick={() => item.href && setMobileMenuOpen(false)}>
+                {renderNavItem(item)}
+              </div>
+            ))}
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
                 handleLogout();
               }}
-              className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-4"
             >
               <LogOut className="mr-3 h-5 w-5" />
               Logout
