@@ -99,6 +99,7 @@ export interface BusinessMetrics {
   transferredOut?: number;
   receivedIn?: number;
   cashBalance: number;
+  personalExpenses?: number;
 }
 
 export interface DashboardData {

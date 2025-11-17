@@ -117,6 +117,11 @@ export default function DashboardPage() {
             <div>
               <p className="metric-label">Expenses</p>
               <p className="text-xl font-semibold text-red-600">{formatCurrency(data.webDev.totalExpenses)}</p>
+              {data.webDev.personalExpenses && data.webDev.personalExpenses > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  (incl. {formatCurrency(data.webDev.personalExpenses)} personal)
+                </p>
+              )}
             </div>
             <div>
               <p className="metric-label">Net Profit</p>
@@ -160,6 +165,11 @@ export default function DashboardPage() {
             <div>
               <p className="metric-label">Expenses</p>
               <p className="text-xl font-semibold text-red-600">{formatCurrency(data.jewels.totalExpenses)}</p>
+              {data.jewels.personalExpenses && data.jewels.personalExpenses > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  (incl. {formatCurrency(data.jewels.personalExpenses)} personal)
+                </p>
+              )}
             </div>
             <div>
               <p className="metric-label">Net Profit</p>

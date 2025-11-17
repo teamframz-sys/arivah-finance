@@ -2,6 +2,7 @@ import { BusinessMetrics, DashboardData } from '@/lib/types';
 import { getTransactions } from './transactions';
 import { getTransfersBetweenBusinesses } from './transfers';
 import { getBusinessByName } from './businesses';
+import { getPersonalExpenses } from './personal-expenses';
 import { getTransactionSign } from '@/lib/utils';
 
 export async function getBusinessMetrics(
@@ -10,6 +11,13 @@ export async function getBusinessMetrics(
   endDate?: string
 ): Promise<BusinessMetrics> {
   const transactions = await getTransactions({
+    businessId,
+    startDate,
+    endDate,
+  });
+
+  // Get personal expenses linked to this business
+  const personalExpenses = await getPersonalExpenses({
     businessId,
     startDate,
     endDate,
@@ -44,14 +52,24 @@ export async function getBusinessMetrics(
     }
   });
 
+  // Add personal expenses to total expenses
+  const personalExpensesTotal = personalExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  totalExpenses += personalExpensesTotal;
+
   const netProfit = totalRevenue - totalExpenses;
 
   // Calculate cash balance (all time)
   const allTransactions = await getTransactions({ businessId });
-  const cashBalance = allTransactions.reduce((sum, txn) => {
+  const allPersonalExpenses = await getPersonalExpenses({ businessId });
+
+  let cashBalance = allTransactions.reduce((sum, txn) => {
     const sign = getTransactionSign(txn.type);
     return sum + (txn.amount * sign);
   }, 0);
+
+  // Subtract all-time personal expenses from cash balance
+  const allTimePersonalExpenses = allPersonalExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  cashBalance -= allTimePersonalExpenses;
 
   return {
     totalRevenue,
@@ -60,6 +78,7 @@ export async function getBusinessMetrics(
     transferredOut,
     receivedIn,
     cashBalance,
+    personalExpenses: personalExpensesTotal,
   };
 }
 
