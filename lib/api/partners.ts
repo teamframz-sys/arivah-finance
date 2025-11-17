@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Partner, ProfitSharingLog, PartnerShare } from '@/lib/types';
 import { getTransactions } from './transactions';
 import { getTransactionSign } from '@/lib/utils';
+import { logActivity } from './activity';
 
 export async function getPartners(): Promise<Partner[]> {
   const { data, error } = await supabase
@@ -22,6 +23,14 @@ export async function updatePartner(id: string, updates: Partial<Partner>): Prom
     .single();
 
   if (error) throw error;
+
+  // Log activity
+  await logActivity('updated_partner', 'partner', id, {
+    name: data.name,
+    equity_percentage: data.equity_percentage,
+    updates: Object.keys(updates),
+  });
+
   return data;
 }
 
@@ -83,6 +92,18 @@ export async function createProfitSharingLog(log: Omit<ProfitSharingLog, 'id' | 
     .single();
 
   if (error) throw error;
+
+  // Log activity
+  await logActivity('created_profit_sharing', 'profit_sharing', data.id, {
+    business: data.business?.name,
+    partner: data.partner?.name,
+    total_profit: data.total_profit,
+    partner_share_amount: data.partner_share_amount,
+    cash_payout_amount: data.cash_payout_amount,
+    reinvested_amount: data.reinvested_to_other_business_amount,
+    period: `${data.period_start_date} to ${data.period_end_date}`,
+  });
+
   return data;
 }
 
@@ -110,5 +131,17 @@ export async function updateProfitSharingLog(id: string, updates: Partial<Profit
     .single();
 
   if (error) throw error;
+
+  // Log activity
+  const action = updates.is_settled ? 'settled_profit_sharing' : 'updated_profit_sharing';
+  await logActivity(action, 'profit_sharing', id, {
+    business: data.business?.name,
+    partner: data.partner?.name,
+    total_profit: data.total_profit,
+    partner_share_amount: data.partner_share_amount,
+    is_settled: data.is_settled,
+    updates: Object.keys(updates),
+  });
+
   return data;
 }

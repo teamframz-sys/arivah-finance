@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase/client';
 import { InterBusinessTransfer } from '@/lib/types';
 import { createTransaction } from './transactions';
+import { logActivity } from './activity';
 
 export async function getTransfers(businessId?: string): Promise<InterBusinessTransfer[]> {
   let query = supabase
@@ -57,6 +58,15 @@ export async function createTransfer(transfer: {
     category: 'Inter-business Transfer',
     amount: transfer.amount,
     description: `Transfer from ${transferData.from_business?.name || 'another business'}: ${transfer.purpose}`,
+  });
+
+  // Log activity
+  await logActivity('created_transfer', 'transfer', transferData.id, {
+    amount: transfer.amount,
+    from_business: transferData.from_business?.name,
+    to_business: transferData.to_business?.name,
+    purpose: transfer.purpose,
+    date: transfer.date,
   });
 
   return transferData;

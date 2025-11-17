@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase/client';
 import { Transaction, TransactionType } from '@/lib/types';
+import { logActivity } from './activity';
 
 export interface TransactionFilters {
   businessId?: string;
@@ -53,6 +54,18 @@ export async function createTransaction(transaction: Omit<Transaction, 'id' | 'c
     .single();
 
   if (error) throw error;
+
+  // Log activity
+  await logActivity('created_transaction', 'transaction', data.id, {
+    amount: data.amount,
+    type: data.type,
+    category: data.category,
+    business: data.business?.name,
+    date: data.date,
+    description: data.description,
+    payment_method: data.payment_method,
+  });
+
   return data;
 }
 
@@ -65,16 +78,45 @@ export async function updateTransaction(id: string, updates: Partial<Transaction
     .single();
 
   if (error) throw error;
+
+  // Log activity
+  await logActivity('updated_transaction', 'transaction', data.id, {
+    amount: data.amount,
+    type: data.type,
+    category: data.category,
+    business: data.business?.name,
+    date: data.date,
+    updates: Object.keys(updates),
+  });
+
   return data;
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
+  // Get transaction details before deleting
+  const { data: transaction } = await supabase
+    .from('transactions')
+    .select('*, business:businesses(*)')
+    .eq('id', id)
+    .single();
+
   const { error } = await supabase
     .from('transactions')
     .delete()
     .eq('id', id);
 
   if (error) throw error;
+
+  // Log activity
+  if (transaction) {
+    await logActivity('deleted_transaction', 'transaction', id, {
+      amount: transaction.amount,
+      type: transaction.type,
+      category: transaction.category,
+      business: transaction.business?.name,
+      date: transaction.date,
+    });
+  }
 }
 
 export async function getCategories(businessId?: string): Promise<string[]> {
