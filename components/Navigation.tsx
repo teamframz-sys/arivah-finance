@@ -14,7 +14,9 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  CheckSquare,
+  Activity
 } from 'lucide-react';
 
 const navItems = [
@@ -23,6 +25,8 @@ const navItems = [
   { href: '/business/jewels', label: 'Arivah Jewels', icon: Gem },
   { href: '/transfers', label: 'Transfers', icon: ArrowLeftRight },
   { href: '/partner-share', label: 'Partner Share', icon: Users },
+  { href: '/tasks', label: 'Tasks', icon: CheckSquare },
+  { href: '/users', label: 'Users & Activity', icon: Activity },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 

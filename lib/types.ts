@@ -117,3 +117,60 @@ export interface PartnerShare {
   shareAmount: number;
   equityPercentage: number;
 }
+
+// Task Types
+export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  business_id?: string;
+  assigned_to?: string;
+  created_by?: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  due_date?: string;
+  completed_at?: string;
+  created_at: string;
+  updated_at: string;
+  business?: Business;
+  assigned_user?: User;
+  creator?: User;
+}
+
+// Activity Log Types
+export type ActivityAction =
+  | 'created_transaction'
+  | 'updated_transaction'
+  | 'deleted_transaction'
+  | 'created_transfer'
+  | 'created_task'
+  | 'updated_task'
+  | 'completed_task'
+  | 'updated_business'
+  | 'updated_partner'
+  | 'created_profit_sharing'
+  | 'login'
+  | 'logout';
+
+export type EntityType = 'transaction' | 'business' | 'task' | 'transfer' | 'partner' | 'profit_sharing' | 'user';
+
+export interface ActivityLog {
+  id: string;
+  user_id: string;
+  action: ActivityAction;
+  entity_type: EntityType;
+  entity_id?: string;
+  details?: Record<string, any>;
+  created_at: string;
+  user?: User;
+}
+
+// User with activity stats
+export interface UserWithStats extends User {
+  total_transactions?: number;
+  total_tasks?: number;
+  recent_activity?: ActivityLog[];
+}
