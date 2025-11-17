@@ -17,7 +17,8 @@ import {
   X,
   CheckSquare,
   Activity,
-  Wallet
+  Wallet,
+  TrendingUp
 } from 'lucide-react';
 
 const navItems = [
@@ -26,6 +27,7 @@ const navItems = [
   { href: '/business/jewels', label: 'Arivah Jewels', icon: Gem },
   { href: '/transfers', label: 'Transfers', icon: ArrowLeftRight },
   { href: '/partner-share', label: 'Partner Share', icon: Users },
+  { href: '/investments', label: 'Investments', icon: TrendingUp },
   { href: '/personal-expenses', label: 'Personal Expenses', icon: Wallet },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/users', label: 'Users & Activity', icon: Activity },

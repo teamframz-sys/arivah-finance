@@ -203,3 +203,36 @@ export interface PersonalExpenseStats {
   reimbursablePending: number;
   reimbursedTotal: number;
 }
+
+// Investment Types
+export interface Investment {
+  id: string;
+  user_id: string;
+  business_id: string;
+  amount: number;
+  investment_date: string;
+  description?: string;
+  is_settled: boolean;
+  settled_date?: string;
+  settlement_note?: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  business?: Business;
+}
+
+export interface InvestmentSettlement {
+  id: string;
+  investment_id: string;
+  partner_id: string;
+  amount: number;
+  settlement_date: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  partner?: Partner;
+}
+
+export interface InvestmentWithSettlements extends Investment {
+  settlements?: InvestmentSettlement[];
+}
