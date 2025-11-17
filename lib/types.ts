@@ -145,20 +145,52 @@ export interface Task {
 
 // Activity Log Types
 export type ActivityAction =
+  // Transaction actions
   | 'created_transaction'
   | 'updated_transaction'
   | 'deleted_transaction'
+  // Transfer actions
   | 'created_transfer'
+  | 'updated_transfer'
+  | 'deleted_transfer'
+  // Investment actions
+  | 'created_investment'
+  | 'updated_investment'
+  | 'deleted_investment'
+  | 'settled_investment'
+  // Personal expense actions
+  | 'created_personal_expense'
+  | 'updated_personal_expense'
+  | 'deleted_personal_expense'
+  | 'reimbursed_expense'
+  // Task actions
   | 'created_task'
   | 'updated_task'
+  | 'deleted_task'
   | 'completed_task'
-  | 'updated_business'
-  | 'updated_partner'
+  | 'cancelled_task'
+  // Partner & profit sharing actions
   | 'created_profit_sharing'
+  | 'updated_profit_sharing'
+  | 'settled_profit_sharing'
+  | 'updated_partner'
+  // Business actions
+  | 'updated_business'
+  // Auth actions
   | 'login'
   | 'logout';
 
-export type EntityType = 'transaction' | 'business' | 'task' | 'transfer' | 'partner' | 'profit_sharing' | 'user';
+export type EntityType =
+  | 'transaction'
+  | 'business'
+  | 'task'
+  | 'transfer'
+  | 'partner'
+  | 'profit_sharing'
+  | 'user'
+  | 'investment'
+  | 'investment_settlement'
+  | 'personal_expense';
 
 export interface ActivityLog {
   id: string;

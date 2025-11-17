@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { UserWithStats, ActivityLog } from '@/lib/types';
 import { getUsersWithStats, getActivityLogs } from '@/lib/api/users';
-import { Users as UsersIcon, Activity, FileText, CheckSquare, TrendingUp, Download, Filter, Calendar } from 'lucide-react';
+import { Users as UsersIcon, Activity, FileText, CheckSquare, TrendingUp, Download, Filter, Calendar, Wallet, DollarSign, ArrowLeftRight } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -117,8 +117,11 @@ export default function UsersPage() {
 
   const getActionIcon = (action: string) => {
     if (action.includes('transaction')) return <FileText className="w-4 h-4" />;
+    if (action.includes('investment')) return <DollarSign className="w-4 h-4" />;
+    if (action.includes('personal_expense') || action.includes('expense')) return <Wallet className="w-4 h-4" />;
     if (action.includes('task')) return <CheckSquare className="w-4 h-4" />;
-    if (action.includes('transfer')) return <TrendingUp className="w-4 h-4" />;
+    if (action.includes('transfer')) return <ArrowLeftRight className="w-4 h-4" />;
+    if (action.includes('profit')) return <TrendingUp className="w-4 h-4" />;
     return <Activity className="w-4 h-4" />;
   };
 
@@ -126,7 +129,8 @@ export default function UsersPage() {
     if (action.includes('created')) return 'text-green-600 bg-green-50';
     if (action.includes('updated')) return 'text-blue-600 bg-blue-50';
     if (action.includes('deleted')) return 'text-red-600 bg-red-50';
-    if (action.includes('completed')) return 'text-purple-600 bg-purple-50';
+    if (action.includes('completed') || action.includes('settled')) return 'text-purple-600 bg-purple-50';
+    if (action.includes('reimbursed')) return 'text-orange-600 bg-orange-50';
     return 'text-gray-600 bg-gray-50';
   };
 
@@ -261,9 +265,14 @@ export default function UsersPage() {
                 >
                   <option value="all">All Types</option>
                   <option value="transaction">Transactions</option>
+                  <option value="investment">Investments</option>
+                  <option value="investment_settlement">Investment Settlements</option>
+                  <option value="personal_expense">Personal Expenses</option>
                   <option value="task">Tasks</option>
                   <option value="transfer">Transfers</option>
                   <option value="profit_sharing">Profit Sharing</option>
+                  <option value="business">Business</option>
+                  <option value="partner">Partners</option>
                   <option value="user">Users</option>
                 </select>
               </div>

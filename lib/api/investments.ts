@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase/client';
 import { Investment, InvestmentSettlement, InvestmentWithSettlements } from '@/lib/types';
+import { logActivity } from './activity';
 
 export interface GetInvestmentsOptions {
   userId?: string;
@@ -129,6 +130,14 @@ export async function createInvestment(
     throw error;
   }
 
+  // Log activity
+  await logActivity('created_investment', 'investment', data.id, {
+    amount: data.amount,
+    business: data.business?.name,
+    investor: data.user?.name,
+    investment_date: data.investment_date,
+  });
+
   return data;
 }
 
@@ -137,7 +146,7 @@ export async function updateInvestment(
   id: string,
   updates: Partial<Investment>
 ): Promise<Investment> {
-  const { data, error } = await supabase
+  const { data, error} = await supabase
     .from('investments')
     .update(updates)
     .eq('id', id)
@@ -153,16 +162,40 @@ export async function updateInvestment(
     throw error;
   }
 
+  // Log activity
+  await logActivity('updated_investment', 'investment', data.id, {
+    amount: data.amount,
+    business: data.business?.name,
+    investor: data.user?.name,
+    updates: Object.keys(updates),
+  });
+
   return data;
 }
 
 // Delete investment
 export async function deleteInvestment(id: string): Promise<void> {
+  // Get investment details before deleting
+  const { data: investment } = await supabase
+    .from('investments')
+    .select('*, user:users(*), business:businesses(*)')
+    .eq('id', id)
+    .single();
+
   const { error } = await supabase.from('investments').delete().eq('id', id);
 
   if (error) {
     console.error('Error deleting investment:', error);
     throw error;
+  }
+
+  // Log activity
+  if (investment) {
+    await logActivity('deleted_investment', 'investment', id, {
+      amount: investment.amount,
+      business: investment.business?.name,
+      investor: investment.user?.name,
+    });
   }
 }
 
@@ -215,6 +248,9 @@ export async function settleInvestment(
   settlementDate: string,
   notes?: string
 ): Promise<InvestmentSettlement[]> {
+  // Get investment details
+  const investment = await getInvestmentById(investmentId);
+
   // Create settlements for each partner
   const settlements = partnerShares.map(share => ({
     investment_id: investmentId,
@@ -242,6 +278,15 @@ export async function settleInvestment(
     is_settled: true,
     settled_date: settlementDate,
     settlement_note: notes,
+  });
+
+  // Log activity
+  await logActivity('settled_investment', 'investment', investmentId, {
+    amount: investment?.amount,
+    business: investment?.business?.name,
+    investor: investment?.user?.name,
+    settlement_date: settlementDate,
+    partners: data?.map(s => ({ partner: s.partner?.name, amount: s.amount })),
   });
 
   return data || [];

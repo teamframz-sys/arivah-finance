@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase/client';
 import { PersonalExpense, PersonalExpenseStats } from '@/lib/types';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { logActivity } from './activity';
 
 export interface PersonalExpenseFilters {
   userId?: string;
@@ -77,6 +78,16 @@ export async function createPersonalExpense(
     .single();
 
   if (error) throw error;
+
+  // Log activity
+  await logActivity('created_personal_expense', 'personal_expense', data.id, {
+    amount: data.amount,
+    category: data.category,
+    business: data.business?.name,
+    user: data.user?.name,
+    is_reimbursable: data.is_reimbursable,
+  });
+
   return data;
 }
 
@@ -92,16 +103,38 @@ export async function updatePersonalExpense(
     .single();
 
   if (error) throw error;
+
+  // Log activity - check if it was reimbursed
+  const action = updates.is_reimbursed ? 'reimbursed_expense' : 'updated_personal_expense';
+  await logActivity(action, 'personal_expense', data.id, {
+    amount: data.amount,
+    category: data.category,
+    business: data.business?.name,
+    user: data.user?.name,
+    updates: Object.keys(updates),
+  });
+
   return data;
 }
 
 export async function deletePersonalExpense(id: string): Promise<void> {
+  // Get expense details before deleting
+  const expense = await getPersonalExpenseById(id);
+
   const { error } = await supabase
     .from('personal_expenses')
     .delete()
     .eq('id', id);
 
   if (error) throw error;
+
+  // Log activity
+  await logActivity('deleted_personal_expense', 'personal_expense', id, {
+    amount: expense.amount,
+    category: expense.category,
+    business: expense.business?.name,
+    user: expense.user?.name,
+  });
 }
 
 export async function getPersonalExpenseCategories(userId?: string): Promise<string[]> {
