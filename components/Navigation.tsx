@@ -120,7 +120,7 @@ export default function Navigation() {
               <ChevronRight className="h-4 w-4" />
             )}
           </button>
-          {isExpanded && (
+          {isExpanded && item.children && (
             <div className="ml-4 space-y-1 mt-1">
               {item.children.map(child => renderNavItem(child, depth + 1))}
             </div>
