@@ -34,7 +34,7 @@ export async function getBusinessPartners(businessId: string): Promise<(Partner 
   if (error) throw error;
 
   return data?.map(bp => ({
-    ...(bp.partner as Partner),
+    ...(bp.partner as unknown as Partner),
     equity_percentage: bp.equity_percentage,
   })) || [];
 }
