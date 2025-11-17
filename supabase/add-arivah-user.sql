@@ -10,15 +10,10 @@
 -- ID: 00000000-0000-0000-0000-000000000001
 -- ============================================================================
 
--- Step 1: First, we need to remove the foreign key constraint temporarily
--- or work around it by creating the auth user first
--- Since we can't directly insert into auth.users, we'll modify the constraint
-
--- Option 1: Drop the foreign key constraint if it exists
+-- Step 1: Drop the foreign key constraint temporarily
 ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_id_fkey;
 
--- Step 2: Insert Arivah user directly into the users table
--- This is a system user, not a login account
+-- Step 2: Insert Arivah system user
 INSERT INTO public.users (id, name, email, created_at, updated_at)
 VALUES (
   '00000000-0000-0000-0000-000000000001',
@@ -29,17 +24,15 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
--- Step 3: Recreate the foreign key constraint, but make it lenient for system users
--- We'll use a CHECK constraint instead to allow the specific system user ID
+-- Step 3: Add a new foreign key constraint that excludes the system user
+-- This allows the Arivah user to exist without an auth.users entry
+-- but requires all other users to have one
 ALTER TABLE public.users
   ADD CONSTRAINT users_id_fkey
-  FOREIGN KEY (id)
-  REFERENCES auth.users(id)
-  ON DELETE CASCADE
-  NOT VALID;
-
--- Mark the constraint as not enforced for existing rows
-ALTER TABLE public.users VALIDATE CONSTRAINT users_id_fkey;
+  CHECK (
+    id = '00000000-0000-0000-0000-000000000001'::uuid OR
+    EXISTS (SELECT 1 FROM auth.users WHERE auth.users.id = users.id)
+  );
 
 -- Verify the user was created successfully
 SELECT
@@ -56,4 +49,12 @@ WHERE id = '00000000-0000-0000-0000-000000000001';
 -- email: system@arivah.com
 -- created_at: (current timestamp)
 
-COMMENT ON TABLE public.users IS 'User accounts - includes both authenticated users and system users like "Arivah"';
+-- Success message
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.users WHERE id = '00000000-0000-0000-0000-000000000001') THEN
+    RAISE NOTICE '✅ SUCCESS: Arivah user created successfully!';
+  ELSE
+    RAISE EXCEPTION '❌ ERROR: Arivah user was not created';
+  END IF;
+END $$;
