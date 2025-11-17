@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { getBusinesses, updateBusiness } from '@/lib/api/businesses';
 import { getPartners, updatePartner } from '@/lib/api/partners';
 import { Business, Partner } from '@/lib/types';
-import { Settings as SettingsIcon, Building, Users } from 'lucide-react';
+import { Settings as SettingsIcon, Building, Users, Bell } from 'lucide-react';
 import toast from 'react-hot-toast';
+import NotificationSettings from '@/components/NotificationSettings';
 
 export default function SettingsPage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
@@ -72,6 +73,15 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-600 mt-1">Manage your businesses and partners</p>
+      </div>
+
+      {/* Notifications */}
+      <div className="card">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <Bell className="mr-2 h-5 w-5 text-primary-600" />
+          Notifications
+        </h2>
+        <NotificationSettings />
       </div>
 
       {/* Businesses */}

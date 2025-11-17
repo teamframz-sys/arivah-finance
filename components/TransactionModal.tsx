@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Transaction, TransactionType } from '@/lib/types';
 import { createTransaction, updateTransaction } from '@/lib/api/transactions';
 import { formatDateInput } from '@/lib/utils';
+import { notify } from '@/lib/notifications';
 import toast from 'react-hot-toast';
 import { X } from 'lucide-react';
 
@@ -85,9 +86,11 @@ export default function TransactionModal({
       if (transaction) {
         await updateTransaction(transaction.id, data);
         toast.success('Transaction updated successfully');
+        notify.transactionUpdated(data.amount, data.category);
       } else {
         await createTransaction(data);
         toast.success('Transaction created successfully');
+        notify.transactionCreated(data.amount, data.category);
       }
 
       onSuccess();
