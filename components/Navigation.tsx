@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   CheckSquare,
-  Activity
+  Activity,
+  Wallet
 } from 'lucide-react';
 
 const navItems = [
@@ -25,6 +26,7 @@ const navItems = [
   { href: '/business/jewels', label: 'Arivah Jewels', icon: Gem },
   { href: '/transfers', label: 'Transfers', icon: ArrowLeftRight },
   { href: '/partner-share', label: 'Partner Share', icon: Users },
+  { href: '/personal-expenses', label: 'Personal Expenses', icon: Wallet },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/users', label: 'Users & Activity', icon: Activity },
   { href: '/settings', label: 'Settings', icon: Settings },

@@ -174,3 +174,31 @@ export interface UserWithStats extends User {
   total_tasks?: number;
   recent_activity?: ActivityLog[];
 }
+
+// Personal Expense Types
+export interface PersonalExpense {
+  id: string;
+  user_id: string;
+  business_id?: string;
+  date: string;
+  category: string;
+  amount: number;
+  payment_method?: string;
+  description?: string;
+  is_reimbursable: boolean;
+  is_reimbursed: boolean;
+  reimbursed_date?: string;
+  tags?: string[];
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  business?: Business;
+}
+
+export interface PersonalExpenseStats {
+  totalExpenses: number;
+  categoryBreakdown: { category: string; amount: number; count: number }[];
+  monthlyTrend: { month: string; amount: number }[];
+  reimbursablePending: number;
+  reimbursedTotal: number;
+}
