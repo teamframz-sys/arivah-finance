@@ -74,6 +74,30 @@ export default function NotificationSettings() {
     );
   }
 
+  const handleTestNotification = () => {
+    const testNotifications = [
+      {
+        title: '💰 Transaction Added',
+        body: '₹50,000 - Client Payment',
+        tag: 'test-transaction',
+      },
+      {
+        title: '🔄 Transfer Completed',
+        body: '₹25,000 from Arivah Web Dev to Arivah Jewels',
+        tag: 'test-transfer',
+      },
+      {
+        title: '✅ Task Completed',
+        body: '"Prepare monthly report" has been completed',
+        tag: 'test-task',
+      },
+    ];
+
+    // Send a random test notification
+    const randomNotif = testNotifications[Math.floor(Math.random() * testNotifications.length)];
+    notificationService.show(randomNotif);
+  };
+
   if (permission === 'granted') {
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -84,6 +108,13 @@ export default function NotificationSettings() {
             <p className="text-xs text-green-700 mt-1">
               You'll receive notifications for transactions, tasks, and more
             </p>
+            <button
+              onClick={handleTestNotification}
+              className="mt-3 bg-green-600 text-white text-xs px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+            >
+              <Bell className="w-3 h-3" />
+              Send Test Notification
+            </button>
           </div>
         </div>
       </div>
