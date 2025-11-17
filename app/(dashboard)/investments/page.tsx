@@ -156,264 +156,263 @@ export default function InvestmentsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-500">Loading investments...</div>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="spinner h-12 w-12 sm:h-16 sm:w-16 mx-auto"></div>
+          <p className="mt-4 text-base sm:text-lg text-gray-600">Loading investments...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Investments</h1>
-          <p className="text-gray-600 mt-1">Track capital investments into your businesses</p>
-        </div>
+      <div className="page-header">
+        <h1 className="page-title">Investments</h1>
+        <p className="page-subtitle">Track capital investments into your businesses</p>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto mt-3 sm:mt-0 sm:absolute sm:top-0 sm:right-0"
         >
-          <Plus className="w-5 h-5" />
-          Add Investment
+          <Plus className="w-5 h-5 flex-shrink-0" />
+          <span>Add Investment</span>
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-3 rounded-lg">
-              <DollarSign className="w-6 h-6 text-green-600" />
+      <div className="section">
+        <div className="stats-grid">
+          <div className="metric-card">
+            <div className="flex items-center justify-between mb-2">
+              <p className="metric-label">Total Investments</p>
+              <div className="metric-icon bg-green-100">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Investments</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(
-                  investments.reduce((sum, inv) => sum + inv.amount, 0)
-                )}
-              </p>
-            </div>
+            <p className="metric-value text-green-600">
+              {formatCurrency(
+                investments.reduce((sum, inv) => sum + inv.amount, 0)
+              )}
+            </p>
           </div>
-        </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-orange-100 p-3 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-orange-600" />
+          <div className="metric-card">
+            <div className="flex items-center justify-between mb-2">
+              <p className="metric-label">Unsettled</p>
+              <div className="metric-icon bg-orange-100">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Unsettled (Your)</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(stats.total)}
-              </p>
-            </div>
+            <p className="metric-value text-orange-600">
+              {formatCurrency(stats.total)}
+            </p>
           </div>
-        </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <Calendar className="w-6 h-6 text-blue-600" />
+          <div className="metric-card">
+            <div className="flex items-center justify-between mb-2">
+              <p className="metric-label">Total Count</p>
+              <div className="metric-icon bg-blue-100">
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Count</p>
-              <p className="text-2xl font-bold text-gray-900">{investments.length}</p>
-            </div>
+            <p className="metric-value text-blue-600">{investments.length}</p>
           </div>
         </div>
       </div>
 
       {/* Add Investment Form */}
       {showAddForm && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Add New Investment</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Investor <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={formData.user_id}
-                  onChange={e => setFormData({ ...formData, user_id: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  required
-                >
-                  <option value="">Select investor</option>
-                  {users.map(user => (
-                    <option key={user.id} value={user.id}>
-                      {user.name}
-                    </option>
-                  ))}
-                </select>
+        <div className="section">
+          <div className="card">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-5">Add New Investment</h2>
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+              <div className="form-grid">
+                <div>
+                  <label className="label">
+                    Investor <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.user_id}
+                    onChange={e => setFormData({ ...formData, user_id: e.target.value })}
+                    className="input"
+                    required
+                  >
+                    <option value="">Select investor</option>
+                    {users.map(user => (
+                      <option key={user.id} value={user.id}>
+                        {user.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="label">
+                    Business <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.business_id}
+                    onChange={e => setFormData({ ...formData, business_id: e.target.value })}
+                    className="input"
+                    required
+                  >
+                    <option value="">Select business</option>
+                    {businesses.map(business => (
+                      <option key={business.id} value={business.id}>
+                        {business.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="label">
+                    Amount <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.amount}
+                    onChange={e => setFormData({ ...formData, amount: e.target.value })}
+                    className="input"
+                    placeholder="0"
+                    step="0.01"
+                    min="0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="label">
+                    Investment Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.investment_date}
+                    onChange={e =>
+                      setFormData({ ...formData, investment_date: e.target.value })
+                    }
+                    className="input"
+                    required
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Business <span className="text-red-500">*</span>
+                <label className="label">
+                  Description
                 </label>
-                <select
-                  value={formData.business_id}
-                  onChange={e => setFormData({ ...formData, business_id: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  required
-                >
-                  <option value="">Select business</option>
-                  {businesses.map(business => (
-                    <option key={business.id} value={business.id}>
-                      {business.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  value={formData.amount}
-                  onChange={e => setFormData({ ...formData, amount: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  placeholder="0"
-                  step="0.01"
-                  min="0"
-                  required
+                <textarea
+                  value={formData.description}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  className="input"
+                  rows={3}
+                  placeholder="Optional notes about this investment"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Investment Date <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={formData.investment_date}
-                  onChange={e =>
-                    setFormData({ ...formData, investment_date: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  required
-                />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="submit"
+                  className="btn-primary"
+                >
+                  Add Investment
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                rows={3}
-                placeholder="Optional notes about this investment"
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-              >
-                Add Investment
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
 
       {/* Investments List */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">All Investments</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Investor
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Business
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {investments.length === 0 ? (
+      <div className="section">
+        <div className="card">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">All Investments</h2>
+          <div className="table-responsive">
+            <table className="table">
+              <thead className="table-header">
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                    No investments found. Add your first investment to get started.
-                  </td>
+                  <th className="table-cell text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="table-cell text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Investor
+                  </th>
+                  <th className="table-cell text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Business
+                  </th>
+                  <th className="table-cell text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="table-cell text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="table-cell text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    Description
+                  </th>
+                  <th className="table-cell text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                investments.map(investment => (
-                  <tr key={investment.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDate(investment.investment_date)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {investment.user?.name || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {investment.business?.name || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {formatCurrency(investment.amount)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {investment.is_settled ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Settled
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                          Unsettled
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {investment.description || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <button
-                        onClick={() => handleDelete(investment.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Delete investment"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {investments.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="empty-state">
+                      No investments found. Add your first investment to get started.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  investments.map(investment => (
+                    <tr key={investment.id} className="hover:bg-gray-50">
+                      <td className="table-cell text-sm text-gray-900">
+                        {formatDate(investment.investment_date)}
+                      </td>
+                      <td className="table-cell text-sm text-gray-900">
+                        {investment.user?.name || '-'}
+                      </td>
+                      <td className="table-cell text-sm text-gray-900">
+                        {investment.business?.name || '-'}
+                      </td>
+                      <td className="table-cell text-sm font-medium text-gray-900">
+                        {formatCurrency(investment.amount)}
+                      </td>
+                      <td className="table-cell">
+                        {investment.is_settled ? (
+                          <span className="badge-success">
+                            Settled
+                          </span>
+                        ) : (
+                          <span className="badge-warning">
+                            Unsettled
+                          </span>
+                        )}
+                      </td>
+                      <td className="table-cell text-sm text-gray-600 hidden sm:table-cell">
+                        {investment.description || '-'}
+                      </td>
+                      <td className="table-cell text-right text-sm">
+                        <button
+                          onClick={() => handleDelete(investment.id)}
+                          className="icon-btn text-red-600 hover:bg-red-50"
+                          title="Delete investment"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
