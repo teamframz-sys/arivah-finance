@@ -69,7 +69,16 @@ export default function PersonalExpensesPage() {
       setExpenses(expensesData);
       setStats(statsData);
       setBusinesses(businessesData);
-      setUsers(usersData);
+
+      // Sort users: "Arivah" first, then authenticated users, then others
+      const sortedUsers = usersData.sort((a, b) => {
+        if (a.name === 'Arivah') return -1;
+        if (b.name === 'Arivah') return 1;
+        if (a.id === currentUser?.id) return -1;
+        if (b.id === currentUser?.id) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      setUsers(sortedUsers);
     } catch (error) {
       console.error('Failed to load data:', error);
       toast.error('Failed to load expenses');
