@@ -68,6 +68,12 @@ npm install
 
 This will create all tables, indexes, RLS policies, and seed the default businesses and partners.
 
+5. **IMPORTANT**: Run the additional migration scripts in order:
+   - `supabase/add-arivah-user.sql` - Creates the default "Arivah" system user
+   - `supabase/personal-expenses.sql` - Adds personal expenses feature
+   - `supabase/investments.sql` - Adds investment tracking feature
+   - `supabase/new-features.sql` - Adds additional features and activity logging
+
 ### 4. Configure Environment Variables
 
 1. Copy the example environment file:

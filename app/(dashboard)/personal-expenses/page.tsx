@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Wallet, Plus, Pencil, Trash2, TrendingDown, DollarSign, RefreshCw, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { ARIVAH_USER_ID } from '@/lib/constants';
 
 export default function PersonalExpensesPage() {
   const [expenses, setExpenses] = useState<PersonalExpense[]>([]);
@@ -72,8 +73,8 @@ export default function PersonalExpensesPage() {
 
       // Sort users: "Arivah" first, then authenticated users, then others
       const sortedUsers = usersData.sort((a, b) => {
-        if (a.name === 'Arivah') return -1;
-        if (b.name === 'Arivah') return 1;
+        if (a.id === ARIVAH_USER_ID) return -1;
+        if (b.id === ARIVAH_USER_ID) return 1;
         if (a.id === currentUser?.id) return -1;
         if (b.id === currentUser?.id) return 1;
         return a.name.localeCompare(b.name);
@@ -391,7 +392,7 @@ function ExpenseModal({
   onSave: () => void;
 }) {
   const [formData, setFormData] = useState({
-    user_id: expense?.user_id || currentUserId,
+    user_id: expense?.user_id || ARIVAH_USER_ID,
     business_id: expense?.business_id || '',
     date: expense?.date || new Date().toISOString().split('T')[0],
     category: expense?.category || '',

@@ -13,6 +13,7 @@ import { getBusinesses } from '@/lib/api/businesses';
 import { supabase } from '@/lib/supabase/client';
 import { Plus, TrendingUp, DollarSign, Calendar, Trash2 } from 'lucide-react';
 import { notify } from '@/lib/notifications';
+import { ARIVAH_USER_ID } from '@/lib/constants';
 
 export default function InvestmentsPage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
@@ -71,14 +72,12 @@ export default function InvestmentsPage() {
       setUsers(usersData);
       setBusinesses(businessesData);
 
-      // Set default user to current user
-      if (profile) {
-        setFormData(prev => ({ ...prev, user_id: profile.id }));
+      // Set default user to Arivah (system default)
+      setFormData(prev => ({ ...prev, user_id: ARIVAH_USER_ID }));
 
-        // Get unsettled stats for current user
-        const userStats = await getUnsettledInvestmentsByUser(profile.id);
-        setStats(userStats);
-      }
+      // Get unsettled stats for Arivah user
+      const userStats = await getUnsettledInvestmentsByUser(ARIVAH_USER_ID);
+      setStats(userStats);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -107,7 +106,7 @@ export default function InvestmentsPage() {
       setInvestments([newInvestment, ...investments]);
       setShowAddForm(false);
       setFormData({
-        user_id: currentUser?.id || '',
+        user_id: ARIVAH_USER_ID,
         business_id: '',
         amount: '',
         investment_date: new Date().toISOString().split('T')[0],
@@ -115,10 +114,8 @@ export default function InvestmentsPage() {
       });
 
       // Reload stats
-      if (currentUser) {
-        const userStats = await getUnsettledInvestmentsByUser(currentUser.id);
-        setStats(userStats);
-      }
+      const userStats = await getUnsettledInvestmentsByUser(ARIVAH_USER_ID);
+      setStats(userStats);
 
       notify.success('Investment Added', `₹${parseFloat(formData.amount).toLocaleString()} investment recorded`);
     } catch (error) {
@@ -135,10 +132,8 @@ export default function InvestmentsPage() {
       setInvestments(investments.filter(inv => inv.id !== id));
 
       // Reload stats
-      if (currentUser) {
-        const userStats = await getUnsettledInvestmentsByUser(currentUser.id);
-        setStats(userStats);
-      }
+      const userStats = await getUnsettledInvestmentsByUser(ARIVAH_USER_ID);
+      setStats(userStats);
 
       notify.success('Investment Deleted', 'Investment has been removed');
     } catch (error) {
